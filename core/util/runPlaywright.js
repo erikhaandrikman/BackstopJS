@@ -124,7 +124,12 @@ async function processScenarioView (scenario, variantOrScenarioLabelSafe, scenar
     if (onBeforeScript) {
       const beforeScriptPath = path.resolve(engineScriptsPath, onBeforeScript);
       if (fs.existsSync(beforeScriptPath)) {
-        await require(beforeScriptPath)(page, scenario, viewport, isReference, browserContext, config);
+        try {
+          await require(beforeScriptPath)(page, scenario, viewport, isReference, browserContext, config);
+        } catch (e) {
+          const { default: beforeScript } = await import(beforeScriptPath);
+          await beforeScript(page, scenario, viewport, isReference, browserContext, config);
+        }
       } else {
         console.warn('WARNING: script not found: ' + beforeScriptPath);
       }
@@ -189,7 +194,12 @@ async function processScenarioView (scenario, variantOrScenarioLabelSafe, scenar
     if (onReadyScript) {
       const readyScriptPath = path.resolve(engineScriptsPath, onReadyScript);
       if (fs.existsSync(readyScriptPath)) {
-        await require(readyScriptPath)(page, scenario, viewport, isReference, browserContext, config);
+        try {
+          await require(readyScriptPath)(page, scenario, viewport, isReference, browserContext, config);
+        } catch (e) {
+          const { default: readyScript } = await import(readyScriptPath);
+          await readyScript(page, scenario, viewport, isReference, browserContext, config);
+        }
       } else {
         console.warn('WARNING: script not found: ' + readyScriptPath);
       }
