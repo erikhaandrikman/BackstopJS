@@ -122,11 +122,12 @@ async function processScenarioView (scenario, variantOrScenarioLabelSafe, scenar
     // --- BEFORE SCRIPT ---
     const onBeforeScript = scenario.onBeforeScript || config.onBeforeScript;
     if (onBeforeScript) {
-      const beforeScriptPath = path.resolve(engineScriptsPath, onBeforeScript);
+      let beforeScriptPath = path.resolve(engineScriptsPath, onBeforeScript);
       if (fs.existsSync(beforeScriptPath)) {
         try {
           await require(beforeScriptPath)(page, scenario, viewport, isReference, browserContext, config);
         } catch (e) {
+          beforeScriptPath = beforeScriptPath.replace(/^C:\\/, 'file:///C:/');
           const { default: beforeScript } = await import(beforeScriptPath);
           await beforeScript(page, scenario, viewport, isReference, browserContext, config);
         }
@@ -140,6 +141,9 @@ async function processScenarioView (scenario, variantOrScenarioLabelSafe, scenar
     if (isReference && scenario.referenceUrl) {
       url = scenario.referenceUrl;
     }
+
+    // replace C:/ with file:///
+    url = url.replace(/^C:\\/, 'file:///C:/');
 
     const gotoParameters = scenario?.engineOptions?.gotoParameters || config?.engineOptions?.gotoParameters || {};
     await page.goto(translateUrl(url), gotoParameters);
@@ -192,11 +196,12 @@ async function processScenarioView (scenario, variantOrScenarioLabelSafe, scenar
     //  --- ON READY SCRIPT ---
     const onReadyScript = scenario.onReadyScript || config.onReadyScript;
     if (onReadyScript) {
-      const readyScriptPath = path.resolve(engineScriptsPath, onReadyScript);
+      let readyScriptPath = path.resolve(engineScriptsPath, onReadyScript);
       if (fs.existsSync(readyScriptPath)) {
         try {
           await require(readyScriptPath)(page, scenario, viewport, isReference, browserContext, config);
         } catch (e) {
+          readyScriptPath = readyScriptPath.replace(/^C:\\/, 'file:///C:/');
           const { default: readyScript } = await import(readyScriptPath);
           await readyScript(page, scenario, viewport, isReference, browserContext, config);
         }
